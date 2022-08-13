@@ -19,7 +19,7 @@
   position: absolute;
   right: 0;
   padding: 20px;
-  // background-color: hsla(0, 0%, 100%, 0.1);
+  max-width: 200px;
 
   .button {
     padding: 40px;
@@ -29,5 +29,9 @@
     color: white;
     text-align: center;
     padding: 20px;
+  }
+
+  svg {
+    outline: 1px solid white;
   }
 }

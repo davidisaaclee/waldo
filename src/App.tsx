@@ -16,7 +16,7 @@ function App() {
 
   return (
     <div className={styles.app}>
-      <Workspace />
+      <Workspace enableSafeAreaBounds editable />
       <div className={styles.toolbar}>
         <button className={styles.button} onClick={pushDuplicateFrame}>
           Capture
@@ -34,6 +34,7 @@ function App() {
           +1
         </button>
         <label className={styles.label}>Frame {currentFrameIndex}</label>
+        <Workspace />
       </div>
     </div>
   );
@@ -43,10 +44,14 @@ export function Workspace({
   style,
   className,
   frameMargin = 200,
+  enableSafeAreaBounds = false,
+  editable = false,
 }: {
   style?: React.CSSProperties;
   className?: string;
   frameMargin?: number;
+  enableSafeAreaBounds?: boolean;
+  editable?: boolean;
 }) {
   const [pieces] = useAtom(A.pieces);
   const mutateSinglePiece = AtomHelpers.useMutateSinglePiece();
@@ -90,25 +95,34 @@ export function Workspace({
           className={classnames(styles.workspace, className)}
           style={style}
         >
-          <svg style={{ flex: 1 }} onPointerMove={onGeneralPointerMove}>
+          <svg
+            style={{ flex: 1 }}
+            onPointerMove={editable ? onGeneralPointerMove : undefined}
+          >
             {Object.entries(pieces).map(([id, piece]) => (
               <PieceView
                 key={id}
                 piece={piece}
-                onPointerDown={(event) => {
-                  pointerRolesRef.current[event.pointerId] = {
-                    piece: id,
-                    prevPosition: vec2.fromClientPosition(event),
-                  };
-                }}
-                onPointerUp={(event) => {
-                  if (pointerRolesRef.current[event.pointerId].piece === id) {
-                    delete pointerRolesRef.current[event.pointerId];
-                  }
-                }}
+                {...(editable
+                  ? {
+                      onPointerDown: (event) => {
+                        pointerRolesRef.current[event.pointerId] = {
+                          piece: id,
+                          prevPosition: vec2.fromClientPosition(event),
+                        };
+                      },
+                      onPointerUp: (event) => {
+                        if (
+                          pointerRolesRef.current[event.pointerId].piece === id
+                        ) {
+                          delete pointerRolesRef.current[event.pointerId];
+                        }
+                      },
+                    }
+                  : {})}
               />
             ))}
-            {dimensions != null && (
+            {enableSafeAreaBounds && dimensions != null && (
               // This shouldn't change aspect ratio with viewport; I think the
               // best thing to do would be to grab aspect ratio at launch, and
               // resizing window just scales the existing aspect ratio to
