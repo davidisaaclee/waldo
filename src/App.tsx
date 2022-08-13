@@ -8,6 +8,9 @@ import * as AtomHelpers from "./model/atomHelpers";
 import { useAtom } from "jotai";
 import Measure from "react-measure";
 
+// width / height
+const BASE_FRAME_SIZE: ReadonlyVec2 = [500, 500];
+
 function App() {
   const [currentFrameIndex, setCurrentFrameIndex] = useAtom(
     A.currentFrameIndexWrapping
@@ -16,7 +19,11 @@ function App() {
 
   return (
     <div className={styles.app}>
-      <Workspace enableSafeAreaBounds editable />
+      <Workspace
+        enableSafeAreaBounds
+        editable
+        // enableInteractiveCameraTransform
+      />
       <div className={styles.toolbar}>
         <button className={styles.button} onClick={pushDuplicateFrame}>
           Capture
@@ -43,30 +50,48 @@ function App() {
 export function Workspace({
   style,
   className,
-  frameMargin = 200,
   enableSafeAreaBounds = false,
   editable = false,
+  enableInteractiveCameraTransform = false,
 }: {
   style?: React.CSSProperties;
   className?: string;
   frameMargin?: number;
   enableSafeAreaBounds?: boolean;
   editable?: boolean;
+  enableInteractiveCameraTransform?: boolean;
 }) {
   const [pieces] = useAtom(A.pieces);
   const mutateSinglePiece = AtomHelpers.useMutateSinglePiece();
   const [dimensions, setDimensions] = React.useState<ReadonlyVec2 | null>(null);
+  const [cameraTransform, setCameraTransform] = React.useState(() =>
+    mat2d.create()
+  );
+
+  React.useEffect(() => {
+    const out = mat2d.create();
+    if (dimensions != null && dimensions[0] > 0 && dimensions[1] > 0) {
+      const scale = mat2d.scaleToAspectFit(BASE_FRAME_SIZE, dimensions);
+      mat2d.multiply(out, out, scale);
+    }
+    setCameraTransform(out);
+  }, [dimensions]);
 
   // maps pointerId -> info
   const pointerRolesRef = React.useRef<
     Record<
       number,
       {
-        piece: string;
+        piece: string | null;
         prevPosition: ReadonlyVec2;
       }
     >
   >({});
+
+  const inverseCameraTransform = React.useMemo(
+    () => mat2d.invert(mat2d.create(), cameraTransform),
+    [cameraTransform]
+  );
 
   const onGeneralPointerMove = React.useCallback(
     (event: React.PointerEvent<SVGElement>) => {
@@ -74,14 +99,41 @@ export function Workspace({
       if (pointerRole == null) {
         return;
       }
+
       const pos = vec2.fromClientPosition(event);
-      const delta = vec2.sub(vec2.create(), pos, pointerRole.prevPosition);
-      mutateSinglePiece(pointerRole.piece, (p) =>
-        M.Piece.translateBy(p, delta)
-      );
+      if (pointerRole.piece == null) {
+        if (enableInteractiveCameraTransform) {
+          const pointPairs: Array<[ReadonlyVec2, ReadonlyVec2]> = [];
+
+          for (const _pointerId of Object.keys(pointerRolesRef.current)) {
+            const pointerId = parseFloat(_pointerId);
+            const prevPos = pointerRolesRef.current[pointerId].prevPosition;
+            if (pointerId === event.pointerId) {
+              pointPairs.push([prevPos, pos]);
+            } else {
+              pointPairs.push([prevPos, prevPos]);
+            }
+            const nudged = mat2d.nudgedEstimate(
+              mat2d.create(),
+              pointPairs.map(([p1, p2]) => [
+                vec2.transformMat2d(vec2.create(), p1, inverseCameraTransform),
+                vec2.transformMat2d(vec2.create(), p2, inverseCameraTransform),
+              ])
+            );
+            setCameraTransform((prev) =>
+              mat2d.mul(mat2d.create(), prev, nudged)
+            );
+          }
+        }
+      } else {
+        const delta = vec2.sub(vec2.create(), pos, pointerRole.prevPosition);
+        mutateSinglePiece(pointerRole.piece, (p) =>
+          M.Piece.translateBy(p, delta)
+        );
+      }
       pointerRole.prevPosition = pos;
     },
-    [mutateSinglePiece]
+    [mutateSinglePiece, inverseCameraTransform]
   );
 
   return (
@@ -95,49 +147,73 @@ export function Workspace({
           className={classnames(styles.workspace, className)}
           style={style}
         >
-          <svg
-            style={{ flex: 1 }}
-            onPointerMove={editable ? onGeneralPointerMove : undefined}
-          >
-            {Object.entries(pieces).map(([id, piece]) => (
-              <PieceView
-                key={id}
-                piece={piece}
-                {...(editable
-                  ? {
-                      onPointerDown: (event) => {
-                        pointerRolesRef.current[event.pointerId] = {
-                          piece: id,
-                          prevPosition: vec2.fromClientPosition(event),
-                        };
-                      },
-                      onPointerUp: (event) => {
-                        if (
-                          pointerRolesRef.current[event.pointerId].piece === id
-                        ) {
-                          delete pointerRolesRef.current[event.pointerId];
+          {dimensions != null && (
+            <svg
+              style={{ flex: 1 }}
+              onPointerMove={editable ? onGeneralPointerMove : undefined}
+              onPointerDown={(event) => {
+                if (pointerRolesRef.current[event.pointerId] != null) {
+                  return;
+                }
+                pointerRolesRef.current[event.pointerId] = {
+                  piece: null,
+                  prevPosition: vec2.fromClientPosition(event),
+                };
+              }}
+              onPointerUp={(event) => {
+                if (pointerRolesRef.current[event.pointerId]?.piece == null) {
+                  delete pointerRolesRef.current[event.pointerId];
+                }
+              }}
+            >
+              <g transform={mat2d.toSvgInstruction(cameraTransform)}>
+                {Object.entries(pieces).map(([id, piece]) => (
+                  <PieceView
+                    key={id}
+                    piece={piece}
+                    {...(editable
+                      ? {
+                          onPointerDown: (event) => {
+                            if (
+                              pointerRolesRef.current[event.pointerId] != null
+                            ) {
+                              return;
+                            }
+                            pointerRolesRef.current[event.pointerId] = {
+                              piece: id,
+                              prevPosition: vec2.fromClientPosition(event),
+                            };
+                          },
+                          onPointerUp: (event) => {
+                            if (
+                              pointerRolesRef.current[event.pointerId].piece ===
+                              id
+                            ) {
+                              delete pointerRolesRef.current[event.pointerId];
+                            }
+                          },
                         }
-                      },
-                    }
-                  : {})}
-              />
-            ))}
-            {enableSafeAreaBounds && dimensions != null && (
-              // This shouldn't change aspect ratio with viewport; I think the
-              // best thing to do would be to grab aspect ratio at launch, and
-              // resizing window just scales the existing aspect ratio to
-              // fit.
-              <rect
-                stroke="red"
-                strokeWidth={1}
-                width={vec2.x(dimensions) - frameMargin * 2}
-                height={vec2.y(dimensions) - frameMargin * 2}
-                x={frameMargin}
-                y={frameMargin}
-                fill="none"
-              />
-            )}
-          </svg>
+                      : {})}
+                  />
+                ))}
+                {enableSafeAreaBounds && dimensions != null && (
+                  // This shouldn't change aspect ratio with viewport; I think the
+                  // best thing to do would be to grab aspect ratio at launch, and
+                  // resizing window just scales the existing aspect ratio to
+                  // fit.
+                  <rect
+                    stroke="red"
+                    strokeWidth={1}
+                    width={vec2.x(BASE_FRAME_SIZE)}
+                    height={vec2.y(BASE_FRAME_SIZE)}
+                    x={0}
+                    y={0}
+                    fill="none"
+                  />
+                )}
+              </g>
+            </svg>
+          )}
         </div>
       )}
     </Measure>
