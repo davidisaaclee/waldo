@@ -8,7 +8,19 @@
   background-color: black;
   display: flex;
   flex: 1;
-  margin: 40px;
 
   touch-action: none;
+}
+
+.toolbar {
+  display: flex;
+
+  position: absolute;
+  right: 0;
+  padding: 20px;
+  // background-color: hsla(0, 0%, 100%, 0.1);
+
+  .button {
+    padding: 40px;
+  }
 }

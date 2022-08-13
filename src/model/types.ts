@@ -19,12 +19,8 @@ export const Piece = {
   }: {
     renderContent(): React.ReactNode;
     transform: Mat2d;
-  }) {
+  }): Piece {
     return { renderContent, transform };
-  },
-
-  clone(p: Piece) {
-    return { ...p, transform: mat2d.clone(p.transform) };
   },
 
   // Getters
@@ -40,10 +36,36 @@ export const Piece = {
   // Setters
 
   translateBy(p: Piece, offset: ReadonlyVec2): void {
-    mat2d.multiply(
-      p.transform,
+    p.transform = mat2d.multiply(
+      // need to change identity of `p.transform` to play nice with immer :(
+      mat2d.create(),
       mat2d.fromTranslation(mat2d.create(), offset),
       p.transform
     );
+  },
+};
+
+export interface Frame {
+  pieces: Record<string, Piece>;
+}
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const Frame = {
+  create({ pieces }: { pieces: Record<string, Piece> }): Frame {
+    return { pieces };
+  },
+};
+
+export interface Animation {
+  frames: Frame[];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const Animation = {
+  create({ frames }: { frames: Frame[] }): Animation {
+    return { frames };
+  },
+
+  insertFrame(anim: Animation, frame: Frame, index: number): void {
+    anim.frames.splice(index, 0, frame);
   },
 };

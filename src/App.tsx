@@ -4,13 +4,34 @@ import { ReadonlyVec2, mat2d, vec2 } from "./utility/gl-matrix";
 import classnames from "classnames";
 import * as M from "./model/types";
 import * as A from "./model/atoms";
+import * as AtomHelpers from "./model/atomHelpers";
 import { useAtom } from "jotai";
 import Measure from "react-measure";
 
 function App() {
+  const [, setCurrentFrameIndex] = useAtom(A.currentFrameIndex);
+  const pushDuplicateFrame = AtomHelpers.usePushDuplicateFrame();
+
   return (
     <div className={styles.app}>
       <Workspace />
+      <div className={styles.toolbar}>
+        <button className={styles.button} onClick={pushDuplicateFrame}>
+          Capture
+        </button>
+        <button
+          className={styles.button}
+          onClick={() => setCurrentFrameIndex((prev) => prev - 1)}
+        >
+          -1
+        </button>
+        <button
+          className={styles.button}
+          onClick={() => setCurrentFrameIndex((prev) => prev + 1)}
+        >
+          +1
+        </button>
+      </div>
     </div>
   );
 }
@@ -18,14 +39,14 @@ function App() {
 export function Workspace({
   style,
   className,
-  frameMargin = 20,
+  frameMargin = 200,
 }: {
   style?: React.CSSProperties;
   className?: string;
   frameMargin?: number;
 }) {
   const [pieces] = useAtom(A.pieces);
-  const mutateSinglePiece = A.useMutateSinglePiece();
+  const mutateSinglePiece = AtomHelpers.useMutateSinglePiece();
   const [dimensions, setDimensions] = React.useState<ReadonlyVec2 | null>(null);
 
   // maps pointerId -> info
@@ -39,6 +60,22 @@ export function Workspace({
     >
   >({});
 
+  const onGeneralPointerMove = React.useCallback(
+    (event: React.PointerEvent<SVGElement>) => {
+      const pointerRole = pointerRolesRef.current[event.pointerId];
+      if (pointerRole == null) {
+        return;
+      }
+      const pos = vec2.fromClientPosition(event);
+      const delta = vec2.sub(vec2.create(), pos, pointerRole.prevPosition);
+      mutateSinglePiece(pointerRole.piece, (p) =>
+        M.Piece.translateBy(p, delta)
+      );
+      pointerRole.prevPosition = pos;
+    },
+    [mutateSinglePiece]
+  );
+
   return (
     <Measure
       bounds
@@ -50,26 +87,7 @@ export function Workspace({
           className={classnames(styles.workspace, className)}
           style={style}
         >
-          <svg
-            style={{ flex: 1 }}
-            onPointerMove={(event) => {
-              const pointerRole = pointerRolesRef.current[event.pointerId];
-              if (pointerRole == null) {
-                return;
-              }
-
-              const pos = vec2.fromClientPosition(event);
-              const delta = vec2.sub(
-                vec2.create(),
-                pos,
-                pointerRole.prevPosition
-              );
-              mutateSinglePiece(pointerRole.piece, (p) =>
-                M.Piece.translateBy(p, delta)
-              );
-              pointerRole.prevPosition = pos;
-            }}
-          >
+          <svg style={{ flex: 1 }} onPointerMove={onGeneralPointerMove}>
             {Object.entries(pieces).map(([id, piece]) => (
               <PieceView
                 key={id}
