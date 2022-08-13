@@ -50,7 +50,7 @@ export interface Frame {
 }
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const Frame = {
-  create({ pieces }: { pieces: Record<string, Piece> }): Frame {
+  create({ pieces = {} }: { pieces?: Record<string, Piece> } = {}): Frame {
     return { pieces };
   },
 };
@@ -67,5 +67,9 @@ export const Animation = {
 
   insertFrame(anim: Animation, frame: Frame, index: number): void {
     anim.frames.splice(index, 0, frame);
+  },
+
+  replaceFrame(anim: Animation, frame: Frame, index: number): void {
+    anim.frames.splice(index, 1, frame);
   },
 };

@@ -15,18 +15,35 @@ function App() {
   const [currentFrameIndex, setCurrentFrameIndex] = useAtom(
     A.currentFrameIndexWrapping
   );
-  const pushDuplicateFrame = AtomHelpers.useInsertDuplicateFrame();
+  const captureFrame = AtomHelpers.useCaptureToFrameCallback();
+
+  const [currentFrame] = useAtom(A.currentFrame);
+  const [workingPieces] = useAtom(A.pieces);
 
   return (
     <div className={styles.app}>
       <Workspace
         enableSafeAreaBounds
         editable
+        pieces={workingPieces}
         // enableInteractiveCameraTransform
       />
       <div className={styles.toolbar}>
-        <button className={styles.button} onClick={pushDuplicateFrame}>
-          Capture
+        <button
+          className={styles.button}
+          onClick={() => {
+            captureFrame({ replaceCurrentFrame: false });
+          }}
+        >
+          Capture to next frame
+        </button>
+        <button
+          className={styles.button}
+          onClick={() => {
+            captureFrame({ replaceCurrentFrame: true });
+          }}
+        >
+          Replace frame
         </button>
         <button
           className={styles.button}
@@ -41,7 +58,7 @@ function App() {
           +1
         </button>
         <label className={styles.label}>Frame {currentFrameIndex}</label>
-        <Workspace />
+        <Workspace pieces={currentFrame.pieces} />
       </div>
     </div>
   );
@@ -53,6 +70,7 @@ export function Workspace({
   enableSafeAreaBounds = false,
   editable = false,
   enableInteractiveCameraTransform = false,
+  pieces,
 }: {
   style?: React.CSSProperties;
   className?: string;
@@ -60,8 +78,8 @@ export function Workspace({
   enableSafeAreaBounds?: boolean;
   editable?: boolean;
   enableInteractiveCameraTransform?: boolean;
+  pieces: Record<string, M.Piece>;
 }) {
-  const [pieces] = useAtom(A.pieces);
   const mutateSinglePiece = AtomHelpers.useMutateSinglePiece();
   const [dimensions, setDimensions] = React.useState<ReadonlyVec2 | null>(null);
   const [cameraTransform, setCameraTransform] = React.useState(() =>
@@ -126,7 +144,15 @@ export function Workspace({
           }
         }
       } else {
-        const delta = vec2.sub(vec2.create(), pos, pointerRole.prevPosition);
+        const delta = vec2.sub(
+          vec2.create(),
+          vec2.transformMat2d(vec2.create(), pos, inverseCameraTransform),
+          vec2.transformMat2d(
+            vec2.create(),
+            pointerRole.prevPosition,
+            inverseCameraTransform
+          )
+        );
         mutateSinglePiece(pointerRole.piece, (p) =>
           M.Piece.translateBy(p, delta)
         );

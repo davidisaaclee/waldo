@@ -5,34 +5,46 @@ import * as M from "./types";
 import * as A from "./atoms";
 
 export function useMutateSinglePiece() {
-  const [, setAnim] = useImmerAtom(A.animation);
-  const [currentFrameIndex] = useAtom(A.currentFrameIndex);
+  const [, setPieces] = useImmerAtom(A.pieces);
 
   return React.useCallback(
     (pieceId: string, mutate: (piece: M.Piece) => void) => {
-      setAnim((prev) => {
-        mutate(prev.frames[currentFrameIndex].pieces[pieceId]);
+      setPieces((prev) => {
+        mutate(prev[pieceId]);
       });
     },
-    [setAnim, currentFrameIndex]
+    [setPieces]
   );
 }
 
-export function useInsertDuplicateFrame() {
+export function useCaptureToFrameCallback() {
   const [pieces] = useAtom(A.pieces);
   const [, setAnimation] = useImmerAtom(A.animation);
   const [currentFrameIndex, setCurrentFrameIndex] = useAtom(
-    A.currentFrameIndex
+    A.currentFrameIndex_unsafe
   );
 
-  return React.useCallback(() => {
-    setAnimation((prev) =>
-      M.Animation.insertFrame(
-        prev,
-        M.Frame.create({ pieces }),
-        currentFrameIndex + 1
-      )
-    );
-    setCurrentFrameIndex((prev) => prev + 1);
-  }, [setAnimation, pieces, currentFrameIndex, setCurrentFrameIndex]);
+  return React.useCallback(
+    ({
+      replaceCurrentFrame = false,
+    }: { replaceCurrentFrame?: boolean } = {}) => {
+      setAnimation((prev) => {
+        if (replaceCurrentFrame) {
+          M.Animation.replaceFrame(
+            prev,
+            M.Frame.create({ pieces }),
+            currentFrameIndex
+          );
+        } else {
+          M.Animation.insertFrame(
+            prev,
+            M.Frame.create({ pieces }),
+            currentFrameIndex + 1
+          );
+          setCurrentFrameIndex((prev) => prev + 1);
+        }
+      });
+    },
+    [setAnimation, pieces, currentFrameIndex, setCurrentFrameIndex]
+  );
 }
