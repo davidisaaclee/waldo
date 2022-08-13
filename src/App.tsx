@@ -111,59 +111,11 @@ export function Workspace({
 
 function PieceView({
   piece,
-  onDrag,
   onPointerDown,
   onPointerUp,
 }: {
   piece: M.Piece;
-  onDrag?: (delta: ReadonlyVec2) => void;
 } & Pick<React.DOMAttributes<SVGElement>, "onPointerDown" | "onPointerUp">) {
-  const previousDragPositionRef = React.useRef<ReadonlyVec2 | null>(null);
-
-  // const pointerEventHandlers = React.useMemo<React.DOMAttributes<SVGElement>>(
-  //   () => ({
-  //     onPointerDown: (event) => {
-  //       if (previousDragPositionRef.current != null) {
-  //         // already being dragged
-  //         return;
-  //       }
-
-  //       event.currentTarget.setPointerCapture(event.pointerId);
-  //       previousDragPositionRef.current = vec2.fromClientPosition(event);
-  //     },
-  //     onPointerLeave(event) {
-  //       if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-  //         event.currentTarget.setPointerCapture(event.pointerId);
-  //       }
-  //     },
-  //     onPointerMove: (event) => {
-  //       // console.log("move", event.clientX, event.currentTarget);
-  //       if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
-  //         console.log("move no cap");
-  //         return;
-  //       }
-  //       const dragPosition = vec2.fromClientPosition(event);
-  //       if (previousDragPositionRef.current != null) {
-  //         const delta = vec2.sub(
-  //           vec2.create(),
-  //           dragPosition,
-  //           previousDragPositionRef.current
-  //         );
-  //         onDrag?.(delta);
-  //       }
-  //       previousDragPositionRef.current = dragPosition;
-
-  //       event.preventDefault();
-  //     },
-  //     onPointerUp: (event) => {
-  //       console.log("pointerup");
-  //       event.currentTarget.releasePointerCapture(event.pointerId);
-  //       previousDragPositionRef.current = null;
-  //     },
-  //   }),
-  //   [onDrag]
-  // );
-
   return (
     <g
       transform={mat2d.toSvgInstruction(M.Piece.transform(piece))}
