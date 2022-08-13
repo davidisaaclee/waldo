@@ -6,14 +6,19 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
     "@testing-library/user-event": "^13.2.1",
+    "@types/gl-matrix": "^3.2.0",
     "@types/jest": "^27.0.1",
     "@types/node": "^16.7.13",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
+    "classnames": "^2.3.1",
+    "gl-matrix": "^3.4.3",
     "jotai": "^1.7.8",
     "lodash": "^4.17.21",
+    "nudged": "^2.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-measure": "^2.5.2",
     "react-scripts": "5.0.1",
     "sass": "^1.54.4",
     "typescript": "^4.4.2",
@@ -45,6 +50,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.182",
+    "@types/react-measure": "^2.0.8",
     "prettier": "^2.7.1"
   }
 }

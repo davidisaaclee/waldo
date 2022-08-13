@@ -1,3 +1,14 @@
 .app {
-  background-color: orange;
+  display: flex;
+  flex: 1;
+  background-color: lightgray;
+}
+
+.workspace {
+  background-color: black;
+  display: flex;
+  flex: 1;
+  margin: 40px;
+
+  touch-action: none;
 }
