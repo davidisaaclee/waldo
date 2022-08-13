@@ -5,11 +5,8 @@
   background-color: lightgray;
 }
 
-.workspace {
+.mainWorkspace {
   background-color: black;
-  display: flex;
-  flex: 1;
-
   touch-action: none;
 }
 
@@ -35,4 +32,21 @@
   svg {
     outline: 1px solid white;
   }
+}
+
+.absoluteFill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.workspaceContainer {
+  display: flex;
+}
+
+.onionSkinWorkspace {
+  pointer-events: none;
+  opacity: 0.3;
 }

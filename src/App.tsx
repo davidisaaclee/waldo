@@ -26,7 +26,13 @@ function App() {
         enableSafeAreaBounds
         editable
         pieces={workingPieces}
+        className={classnames(styles.absoluteFill, styles.mainWorkspace)}
         // enableInteractiveCameraTransform
+      />
+      <Workspace
+        editable={false}
+        pieces={currentFrame.pieces}
+        className={classnames(styles.absoluteFill, styles.onionSkinWorkspace)}
       />
       <div className={styles.toolbar}>
         <button
@@ -170,7 +176,7 @@ export function Workspace({
       {({ measureRef }) => (
         <div
           ref={measureRef}
-          className={classnames(styles.workspace, className)}
+          className={classnames(styles.workspaceContainer, className)}
           style={style}
         >
           {dimensions != null && (
