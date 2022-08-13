@@ -1,0 +1,25 @@
+.toolbar {
+  display: flex;
+  flex-flow: column;
+
+  position: absolute;
+  right: 0;
+  padding: 20px;
+  max-width: 200px;
+
+  .button {
+    padding: 40px;
+  }
+
+  .label {
+    color: white;
+    text-align: center;
+    padding: 20px;
+  }
+
+  svg {
+    outline: 1px solid white;
+  }
+}
+
+
