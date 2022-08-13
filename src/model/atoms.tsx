@@ -3,7 +3,7 @@ import * as M from "./types";
 import { uniqueId, keyBy } from "lodash";
 import { mat2d } from "../utility/gl-matrix";
 
-export const _currentFrameIndex_unsafe = atom(0);
+const _currentFrameIndex_unsafe = atom(0);
 export const currentFrameIndex = atom(
   (read) => read(_currentFrameIndex_unsafe),
   (read, write, update: SetStateAction<number>) => {
@@ -17,6 +17,20 @@ export const currentFrameIndex = atom(
         0,
         Math.min(read(animation).frames.length - 1, proposedNextValue)
       )
+    );
+  }
+);
+export const currentFrameIndexWrapping = atom(
+  (read) => read(_currentFrameIndex_unsafe),
+  (read, write, update: SetStateAction<number>) => {
+    const proposedNextValue =
+      typeof update === "function"
+        ? update(read(_currentFrameIndex_unsafe))
+        : update;
+    write(
+      _currentFrameIndex_unsafe,
+      (proposedNextValue + read(animation).frames.length) %
+        read(animation).frames.length
     );
   }
 );

@@ -9,8 +9,10 @@ import { useAtom } from "jotai";
 import Measure from "react-measure";
 
 function App() {
-  const [, setCurrentFrameIndex] = useAtom(A.currentFrameIndex);
-  const pushDuplicateFrame = AtomHelpers.usePushDuplicateFrame();
+  const [currentFrameIndex, setCurrentFrameIndex] = useAtom(
+    A.currentFrameIndexWrapping
+  );
+  const pushDuplicateFrame = AtomHelpers.useInsertDuplicateFrame();
 
   return (
     <div className={styles.app}>
@@ -31,6 +33,7 @@ function App() {
         >
           +1
         </button>
+        <label className={styles.label}>Frame {currentFrameIndex}</label>
       </div>
     </div>
   );

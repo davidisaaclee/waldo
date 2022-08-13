@@ -18,19 +18,21 @@ export function useMutateSinglePiece() {
   );
 }
 
-export function usePushDuplicateFrame() {
+export function useInsertDuplicateFrame() {
   const [pieces] = useAtom(A.pieces);
   const [, setAnimation] = useImmerAtom(A.animation);
-  const [, setCurrentFrameIndex] = useAtom(A.currentFrameIndex);
+  const [currentFrameIndex, setCurrentFrameIndex] = useAtom(
+    A.currentFrameIndex
+  );
 
   return React.useCallback(() => {
     setAnimation((prev) =>
       M.Animation.insertFrame(
         prev,
         M.Frame.create({ pieces }),
-        prev.frames.length
+        currentFrameIndex + 1
       )
     );
     setCurrentFrameIndex((prev) => prev + 1);
-  }, [setAnimation, pieces]);
+  }, [setAnimation, pieces, currentFrameIndex, setCurrentFrameIndex]);
 }
