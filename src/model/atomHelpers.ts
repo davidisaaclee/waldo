@@ -27,20 +27,19 @@ export function useCaptureToFrameCallback() {
   return React.useCallback(
     ({
       replaceCurrentFrame = false,
-    }: { replaceCurrentFrame?: boolean } = {}) => {
+      useBlankFrameInsteadOfDuplicate = false,
+    }: {
+      replaceCurrentFrame?: boolean;
+      useBlankFrameInsteadOfDuplicate?: boolean;
+    } = {}) => {
+      const frameToInsert = useBlankFrameInsteadOfDuplicate
+        ? M.Frame.create()
+        : M.Frame.create({ pieces });
       setAnimation((prev) => {
         if (replaceCurrentFrame) {
-          M.Animation.replaceFrame(
-            prev,
-            M.Frame.create({ pieces }),
-            currentFrameIndex
-          );
+          M.Animation.replaceFrame(prev, frameToInsert, currentFrameIndex);
         } else {
-          M.Animation.insertFrame(
-            prev,
-            M.Frame.create({ pieces }),
-            currentFrameIndex + 1
-          );
+          M.Animation.insertFrame(prev, frameToInsert, currentFrameIndex + 1);
           setCurrentFrameIndex((prev) => prev + 1);
         }
       });

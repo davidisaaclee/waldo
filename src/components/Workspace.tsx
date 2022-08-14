@@ -141,6 +141,17 @@ export function Workspace({
                 }
               }}
             >
+              <defs>
+                <filter id="pieceShadow" x="0" y="0" width="200%" height="200%">
+                  <feDropShadow
+                    dx="1"
+                    dy="1"
+                    stdDeviation="0"
+                    floodColor="black"
+                    floodOpacity={0.5}
+                  />
+                </filter>
+              </defs>
               <g transform={mat2d.toSvgInstruction(cameraTransform)}>
                 {Object.entries(pieces).map(([id, piece]) => (
                   <PieceView
@@ -207,6 +218,7 @@ function PieceView({
       transform={mat2d.toSvgInstruction(M.Piece.transform(piece))}
       onPointerDown={onPointerDown}
       onPointerUp={onPointerUp}
+      filter="url(#pieceShadow)"
     >
       {M.Piece.render(piece)}
     </g>

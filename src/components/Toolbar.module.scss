@@ -9,6 +9,11 @@
 
   .button {
     padding: 40px;
+
+    &:disabled {
+      opacity: 0.5;
+      text-decoration: line-through;
+    }
   }
 
   .label {
@@ -17,9 +22,16 @@
     padding: 20px;
   }
 
-  svg {
+  .preview {
     outline: 1px solid white;
   }
 }
 
+.transport {
+  display: flex;
+  flex-flow: row nowrap;
 
+  .button {
+    padding: 20px;
+  }
+}
