@@ -210,7 +210,7 @@ export function Workspace({
                         }
                       : {})}
                   >
-                    {M.Piece.render(piece)}
+                    <path d={piece.path} fill={piece.fill} />
                   </g>
                 ))}
               </g>
@@ -219,23 +219,5 @@ export function Workspace({
         </div>
       )}
     </Measure>
-  );
-}
-
-function PieceView({
-  piece,
-  onPointerDown,
-  onPointerUp,
-}: {
-  piece: M.Piece;
-} & Pick<React.DOMAttributes<SVGElement>, "onPointerDown" | "onPointerUp">) {
-  return (
-    <g
-      transform={mat2d.toSvgInstruction(M.Piece.transform(piece))}
-      onPointerDown={onPointerDown}
-      onPointerUp={onPointerUp}
-    >
-      {M.Piece.render(piece)}
-    </g>
   );
 }

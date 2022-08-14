@@ -5,6 +5,7 @@ import * as AtomHelpers from "../model/atomHelpers";
 import { useAtom } from "jotai";
 import { Workspace } from "./Workspace";
 import { useAnimationFrame } from "../utility/useAnimationFrame";
+import { useMutableCallback } from "../utility/useMutable";
 
 const FRAME_DURATION_MS = 100;
 
@@ -38,17 +39,26 @@ export function Toolbar() {
   });
 
   const [selection] = useAtom(A.selection);
-  const cloneSelection = AtomHelpers.useCloneSelection();
+  const cloneSelection = useMutableCallback(AtomHelpers.useCloneSelection());
   const cloneSelectionButtonRef =
     React.useRef<React.ElementRef<"button">>(null);
+  const changeSelectionColor = useMutableCallback(
+    AtomHelpers.useChangeSelectionColorCallback()
+  );
+  const changeColorButtonRef = React.useRef<React.ElementRef<"button">>(null);
 
   const restoreFrame = AtomHelpers.useRestoreFrameCallback();
 
   React.useEffect(() => {
+    const buttonForKey: Record<
+      string,
+      React.RefObject<React.ElementRef<"button">>
+    > = {
+      d: cloneSelectionButtonRef,
+      c: changeColorButtonRef,
+    };
     function onKeyPress(event: KeyboardEvent) {
-      if (event.key === "c") {
-        cloneSelectionButtonRef.current?.click();
-      }
+      buttonForKey[event.key]?.current?.click();
     }
     document.addEventListener("keypress", onKeyPress);
     return () => document.removeEventListener("keypress", onKeyPress);
@@ -134,13 +144,22 @@ export function Toolbar() {
       </label>
 
       {Object.keys(selection).length > 0 && (
-        <button
-          ref={cloneSelectionButtonRef}
-          className={styles.button}
-          onClick={cloneSelection}
-        >
-          <u>C</u>lone selection
-        </button>
+        <>
+          <button
+            ref={cloneSelectionButtonRef}
+            className={styles.button}
+            onClick={cloneSelection}
+          >
+            <u>D</u>uplicate selection
+          </button>
+          <button
+            ref={changeColorButtonRef}
+            className={styles.button}
+            onClick={changeSelectionColor}
+          >
+            <u>C</u>hange color
+          </button>
+        </>
       )}
     </div>
   );

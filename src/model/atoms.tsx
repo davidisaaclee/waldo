@@ -1,8 +1,9 @@
 import { atom, SetStateAction } from "jotai";
 import * as M from "./types";
-import { keyBy } from "lodash";
+import { keyBy, sample } from "lodash";
 // import { produce } from "immer";
 import { mat2d } from "../utility/gl-matrix";
+import * as K from "../constants";
 
 export const currentFrameIndex_unsafe = atom(0);
 export const currentFrameIndex = atom(
@@ -53,15 +54,23 @@ export const pieces = atom<Record<string, M.Piece>>(
   keyBy(
     [
       M.Piece.create({
-        renderContent: () => <rect fill="blue" width={100} height={100} />,
+        path: "M 0 0 l 100 0 l 0 100 l -100 0 z",
+        fill: sample(K.COLOR_PALETTE)!,
+        // renderContent: () => <rect fill="blue" width={100} height={100} />,
         transform: mat2d.compose(mat2d.create(), {
           translation: [100, 0],
           rotation: 0.3,
-          scale: [2, 1],
+          scale: [1, 1],
         }),
       }),
       M.Piece.create({
-        renderContent: () => <circle fill="yellow" r={80} />,
+        path: `
+        M 0,0
+        m -75, 0
+        a 75,75 0 1,0 150,0
+        a 75,75 0 1,0 -150,0
+        `,
+        fill: sample(K.COLOR_PALETTE)!,
         transform: mat2d.compose(mat2d.create(), {
           translation: [100, 300],
           rotation: 0,
@@ -69,20 +78,20 @@ export const pieces = atom<Record<string, M.Piece>>(
         }),
       }),
       M.Piece.create({
-        renderContent: () => (
-          <path d="M 0 0 l 100 0 l -50 100 l -50 -100 Z" fill="orange" />
-        ),
+        path: "M 0 0 l 100 0 l -50 100 l -50 -100 Z",
+        fill: sample(K.COLOR_PALETTE)!,
         transform: mat2d.compose(mat2d.create(), {
-          translation: [500, 200],
+          translation: [200, 200],
           rotation: 0,
           scale: [1, 1],
         }),
       }),
       M.Piece.create({
-        renderContent: () => <rect fill="purple" width={150} height={150} />,
+        path: "M 0 0 l 100 0 l -50 100 l -50 -100 Z",
+        fill: sample(K.COLOR_PALETTE)!,
         transform: mat2d.compose(mat2d.create(), {
-          translation: [1000, 600],
-          rotation: 0,
+          translation: [400, 100],
+          rotation: 0.8,
           scale: [1, 1],
         }),
       }),

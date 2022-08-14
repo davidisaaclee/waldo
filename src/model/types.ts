@@ -1,4 +1,3 @@
-import * as React from "react";
 import { uniqueId } from "lodash";
 import {
   ReadonlyMat2d,
@@ -12,20 +11,23 @@ export function nextId(collection: "pieces"): string {
 }
 
 export interface Piece {
-  renderContent(): React.ReactNode;
+  path: string;
+  fill: string;
   transform: Mat2d;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
 export const Piece = {
   create({
-    renderContent,
+    path,
+    fill,
     transform,
   }: {
-    renderContent(): React.ReactNode;
+    path: string;
+    fill: string;
     transform: Mat2d;
   }): Piece {
-    return { renderContent, transform };
+    return { path, fill, transform };
   },
 
   clone(p: Piece): Piece {
@@ -36,10 +38,6 @@ export const Piece = {
 
   transform(p: Piece): ReadonlyMat2d {
     return p.transform;
-  },
-
-  render(p: Piece): React.ReactNode {
-    return p.renderContent();
   },
 
   // Setters

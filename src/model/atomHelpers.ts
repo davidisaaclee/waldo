@@ -3,6 +3,7 @@ import { useAtom } from "jotai";
 import { useImmerAtom } from "jotai/immer";
 import * as M from "./types";
 import * as A from "./atoms";
+import * as K from "../constants";
 
 export function useMutateSinglePiece() {
   const [, setPieces] = useImmerAtom(A.pieces);
@@ -57,6 +58,25 @@ export function useCloneSelection() {
       const selectedPieces = Object.keys(selection).map((id) => pieces[id]);
       for (const p of selectedPieces) {
         pieces[M.nextId("pieces")] = M.Piece.clone(p);
+      }
+    });
+  }, [selection, setPieces]);
+}
+
+let nextPaletteSampleIndex = 0;
+
+export function useChangeSelectionColorCallback() {
+  const [selection] = useAtom(A.selection);
+  const [, setPieces] = useImmerAtom(A.pieces);
+  return React.useCallback(() => {
+    const color = K.COLOR_PALETTE[nextPaletteSampleIndex];
+    nextPaletteSampleIndex =
+      (nextPaletteSampleIndex + 1) % K.COLOR_PALETTE.length;
+
+    setPieces((pieces) => {
+      const selectedPieces = Object.keys(selection).map((id) => pieces[id]);
+      for (const p of selectedPieces) {
+        p.fill = color;
       }
     });
   }, [selection, setPieces]);
