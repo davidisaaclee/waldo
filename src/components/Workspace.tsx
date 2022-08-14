@@ -21,9 +21,11 @@ export function Workspace({
   pieces,
   onChangePieceSelected,
   wireframe = false,
+  frameMargin = 100,
 }: {
   style?: React.CSSProperties;
   className?: string;
+  // how much space outside the frame should be shown?
   frameMargin?: number;
   enableSafeAreaBounds?: boolean;
   editable?: boolean;
@@ -39,12 +41,46 @@ export function Workspace({
     mat2d.create()
   );
 
+  // Set initial camera transform (once view is measured)
   React.useEffect(() => {
     const out = mat2d.create();
     if (dimensions != null && dimensions[0] > 0 && dimensions[1] > 0) {
-      const scale = mat2d.scaleToAspectFit(BASE_FRAME_SIZE, dimensions);
-      mat2d.multiply(out, out, scale);
+      const scale = vec2.scaleToAspectFit(
+        BASE_FRAME_SIZE,
+        vec2.sub(vec2.create(), dimensions, vec2.unit(frameMargin * 2))
+      );
+      mat2d.multiply(
+        out,
+        mat2d.fromScaling(mat2d.create(), vec2.unit(scale)),
+        out
+      );
+
+      mat2d.multiply(
+        out,
+        mat2d.fromTranslation(mat2d.create(), vec2.unit(frameMargin)),
+        out
+      );
+
+      const centering = (() => {
+        const frameWithMarginsSize = vec2.add(
+          vec2.create(),
+          vec2.scale(vec2.create(), BASE_FRAME_SIZE, scale),
+          vec2.unit(frameMargin * 2)
+        );
+
+        return vec2.scale(
+          vec2.create(),
+          vec2.sub(vec2.create(), frameWithMarginsSize, dimensions),
+          -0.5
+        );
+      })();
+      mat2d.multiply(
+        out,
+        mat2d.fromTranslation(mat2d.create(), centering),
+        out
+      );
     }
+
     setCameraTransform(out);
   }, [dimensions]);
 
@@ -252,6 +288,12 @@ export function Workspace({
                     />
                   </g>
                 ))}
+                <rect
+                  width={vec2.x(BASE_FRAME_SIZE)}
+                  height={vec2.y(BASE_FRAME_SIZE)}
+                  fill="none"
+                  stroke="red"
+                />
               </g>
             </svg>
           )}

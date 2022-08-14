@@ -138,10 +138,14 @@ export function Toolbar() {
           +1
         </button>
       </div>
-      <Workspace pieces={currentFrame.pieces} className={styles.preview} />
-      <label className={styles.label}>
+      <Workspace
+        pieces={currentFrame.pieces}
+        className={styles.preview}
+        frameMargin={0}
+      />
+      <div className={styles.label}>
         Frame {currentFrameIndex + 1} / {animation.frames.length}
-      </label>
+      </div>
 
       {Object.keys(selection).length > 0 && (
         <>

@@ -1,13 +1,11 @@
 .toolbar {
-  display: flex;
-  flex-flow: column;
-
   position: absolute;
   right: 0;
-  padding: 20px;
+  margin: 20px;
   max-width: 200px;
 
   .button {
+    width: 100%;
     padding: 30px;
 
     &:disabled {
@@ -19,11 +17,14 @@
   .label {
     color: white;
     text-align: center;
-    padding: 20px;
+    padding: 20px 0;
+    width: 100%;
   }
 
   .preview {
     outline: 1px solid white;
+    width: 100%;
+    aspect-ratio: 1 / 1;
   }
 }
 
