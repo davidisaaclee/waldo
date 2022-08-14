@@ -1,6 +1,6 @@
 import * as React from "react";
 import styles from "./Workspace.module.scss";
-import { ReadonlyVec2, mat2d, vec2 } from "../utility/gl-matrix";
+import { ReadonlyVec2, Vec2, mat2d, vec2 } from "../utility/gl-matrix";
 import classnames from "classnames";
 import * as M from "../model/types";
 import { useAtom } from "jotai";
@@ -64,6 +64,8 @@ export function Workspace({
 
   const [temporaryEditsRef] = useAtom(A.temporaryEditsRef);
 
+  const [selection] = useAtom(A.selection);
+
   const onGeneralPointerMove = React.useCallback(
     (event: React.PointerEvent<SVGElement>) => {
       const pointerRole = pointerRolesRef.current[event.pointerId];
@@ -71,28 +73,45 @@ export function Workspace({
         return;
       }
 
+      const clientToWorkspace = (p: ReadonlyVec2, out: Vec2 = vec2.create()) =>
+        vec2.transformMat2d(out, p, inverseCameraTransform);
+
       const pos = vec2.fromClientPosition(event);
       if (pointerRole.piece == null) {
-        if (enableInteractiveCameraTransform) {
-          const pointPairs: Array<[ReadonlyVec2, ReadonlyVec2]> = [];
+        // Collect pointer positions into array of [prevPos, currPos] for each pointer.
+        // These are in client coordinates.
+        const pointPairs: Array<[ReadonlyVec2, ReadonlyVec2]> = [];
+        for (const _pointerId of Object.keys(pointerRolesRef.current)) {
+          const pointerId = parseFloat(_pointerId);
+          const prevPos = clientToWorkspace(
+            pointerRolesRef.current[pointerId].prevPosition
+          );
+          if (pointerId === event.pointerId) {
+            pointPairs.push([prevPos, clientToWorkspace(pos)]);
+          } else {
+            pointPairs.push([prevPos, prevPos]);
+          }
+        }
 
-          for (const _pointerId of Object.keys(pointerRolesRef.current)) {
-            const pointerId = parseFloat(_pointerId);
-            const prevPos = pointerRolesRef.current[pointerId].prevPosition;
-            if (pointerId === event.pointerId) {
-              pointPairs.push([prevPos, pos]);
-            } else {
-              pointPairs.push([prevPos, prevPos]);
-            }
-            const nudged = mat2d.nudgedEstimate(
-              mat2d.create(),
-              pointPairs.map(([p1, p2]) => [
-                vec2.transformMat2d(vec2.create(), p1, inverseCameraTransform),
-                vec2.transformMat2d(vec2.create(), p2, inverseCameraTransform),
-              ])
+        const transform = mat2d.nudgedEstimate(mat2d.create(), pointPairs);
+
+        if (Object.keys(selection).length > 0) {
+          // pointer is being dragged over canvas while pieces are selected;
+          // use this as a selection transform input.
+          Object.keys(selection).forEach((id) => {
+            temporaryEditsRef.current[id] = mat2d.multiply(
+              temporaryEditsRef.current[id] ?? mat2d.create(),
+              transform,
+              temporaryEditsRef.current[id] ??
+                M.Piece.transform(getPieces()[id])
             );
+          });
+        } else {
+          // pointer is being dragged over canvas with no pieces selected;
+          // use this as a camera transform input.
+          if (enableInteractiveCameraTransform) {
             setCameraTransform((prev) =>
-              mat2d.mul(mat2d.create(), prev, nudged)
+              mat2d.mul(mat2d.create(), prev, transform)
             );
           }
         }
@@ -122,10 +141,11 @@ export function Workspace({
       pointerRole.prevPosition = pos;
     },
     [
-      temporaryEditsRef,
       getPieces,
       enableInteractiveCameraTransform,
       inverseCameraTransform,
+      selection,
+      temporaryEditsRef,
     ]
   );
 
