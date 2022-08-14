@@ -4,7 +4,7 @@ import * as A from "../model/atoms";
 import * as AtomHelpers from "../model/atomHelpers";
 import { useAtom } from "jotai";
 import { Workspace } from "./Workspace";
-import { useMutableCallback } from "../utility/useMutable";
+import { useAnimationFrame } from "../utility/useAnimationFrame";
 
 const FRAME_DURATION_MS = 100;
 
@@ -144,43 +144,4 @@ export function Toolbar() {
       )}
     </div>
   );
-}
-
-function useAnimationFrame({
-  enabled,
-  callback,
-}: {
-  enabled: boolean;
-  callback: FrameRequestCallback;
-}) {
-  const callbackHandleRef = React.useRef<number | null>(null);
-  const callback_mutable = useMutableCallback(callback);
-
-  React.useEffect(() => {
-    if (enabled) {
-      const frame: FrameRequestCallback = (...args) => {
-        if (!enabled) {
-          callbackHandleRef.current = null;
-          return;
-        }
-
-        callback_mutable(...args);
-        callbackHandleRef.current = requestAnimationFrame(frame);
-      };
-
-      callbackHandleRef.current = requestAnimationFrame(frame);
-    } else {
-      if (callbackHandleRef.current != null) {
-        cancelAnimationFrame(callbackHandleRef.current);
-        callbackHandleRef.current = null;
-      }
-    }
-
-    return () => {
-      if (callbackHandleRef.current != null) {
-        cancelAnimationFrame(callbackHandleRef.current);
-        callbackHandleRef.current = null;
-      }
-    };
-  }, [callback_mutable, callbackHandleRef, enabled]);
 }
