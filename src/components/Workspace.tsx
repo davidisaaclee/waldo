@@ -136,9 +136,7 @@ export function Workspace({
                 };
               }}
               onPointerUp={(event) => {
-                if (pointerRolesRef.current[event.pointerId]?.piece == null) {
-                  delete pointerRolesRef.current[event.pointerId];
-                }
+                delete pointerRolesRef.current[event.pointerId];
               }}
             >
               <defs>
