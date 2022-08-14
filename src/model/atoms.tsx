@@ -59,7 +59,6 @@ export const pieces = atom<Record<string, M.Piece>>(
       M.Piece.create({
         path: "M 0 0 l 100 0 l 0 100 l -100 0 z",
         fill: sample(K.COLOR_PALETTE)!,
-        // renderContent: () => <rect fill="blue" width={100} height={100} />,
         transform: mat2d.compose(mat2d.create(), {
           translation: [100, 0],
           rotation: 0.3,
