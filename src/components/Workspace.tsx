@@ -1,10 +1,12 @@
 import * as React from "react";
 import styles from "./Workspace.module.scss";
-import { ReadonlyVec2, mat2d, vec2 } from "../utility/gl-matrix";
+import { ReadonlyVec2, Mat2d, mat2d, vec2 } from "../utility/gl-matrix";
 import classnames from "classnames";
 import * as M from "../model/types";
 import * as AtomHelpers from "../model/atomHelpers";
 import Measure from "react-measure";
+import { useAnimationFrame } from "../utility/useAnimationFrame";
+import { useMutable } from "../utility/useMutable";
 
 // width / height
 const BASE_FRAME_SIZE: ReadonlyVec2 = [500, 500];
@@ -12,7 +14,6 @@ const BASE_FRAME_SIZE: ReadonlyVec2 = [500, 500];
 export function Workspace({
   style,
   className,
-  enableSafeAreaBounds = false,
   editable = false,
   enableInteractiveCameraTransform = false,
   pieces,
@@ -27,6 +28,7 @@ export function Workspace({
   pieces: Record<string, M.Piece>;
   onChangePieceSelected?: (pieceId: string, isSelected: boolean) => void;
 }) {
+  const getPieces = useMutable(pieces);
   const mutateSinglePiece = AtomHelpers.useMutateSinglePiece();
   const [dimensions, setDimensions] = React.useState<ReadonlyVec2 | null>(null);
   const [cameraTransform, setCameraTransform] = React.useState(() =>
@@ -57,6 +59,8 @@ export function Workspace({
     () => mat2d.invert(mat2d.create(), cameraTransform),
     [cameraTransform]
   );
+
+  const temporaryEditsRef = React.useRef<Record<string, Mat2d>>({});
 
   const onGeneralPointerMove = React.useCallback(
     (event: React.PointerEvent<SVGElement>) => {
@@ -91,27 +95,47 @@ export function Workspace({
           }
         }
       } else {
-        const delta = vec2.sub(
-          vec2.create(),
-          vec2.transformMat2d(vec2.create(), pos, inverseCameraTransform),
-          vec2.transformMat2d(
-            vec2.create(),
-            pointerRole.prevPosition,
-            inverseCameraTransform
-          )
-        );
-        mutateSinglePiece(pointerRole.piece, (p) =>
-          M.Piece.translateBy(p, delta)
+        const delta = (() => {
+          const out = vec2.create();
+          vec2.transformMat2d(out, pos, inverseCameraTransform);
+          vec2.sub(
+            out,
+            out,
+            vec2.transformMat2d(
+              vec2.create(),
+              pointerRole.prevPosition,
+              inverseCameraTransform
+            )
+          );
+          return out;
+        })();
+
+        temporaryEditsRef.current[pointerRole.piece] = mat2d.multiply(
+          temporaryEditsRef.current[pointerRole.piece] ?? mat2d.create(),
+          mat2d.fromTranslation(mat2d.create(), delta),
+          temporaryEditsRef.current[pointerRole.piece] ??
+            M.Piece.transform(getPieces()[pointerRole.piece])
         );
       }
       pointerRole.prevPosition = pos;
     },
-    [
-      enableInteractiveCameraTransform,
-      mutateSinglePiece,
-      inverseCameraTransform,
-    ]
+    [getPieces, enableInteractiveCameraTransform, inverseCameraTransform]
   );
+
+  const pieceViewsRef = React.useRef<Record<string, SVGElement>>({});
+  useAnimationFrame({
+    enabled: true,
+    callback() {
+      for (const id of Object.keys(temporaryEditsRef.current)) {
+        const edit = temporaryEditsRef.current[id];
+        const node = pieceViewsRef.current[id];
+        if (node == null) {
+          return;
+        }
+        node.setAttribute("transform", mat2d.toSvgInstruction(edit));
+      }
+    },
+  });
 
   return (
     <Measure
@@ -141,6 +165,14 @@ export function Workspace({
                 const heldPiece =
                   pointerRolesRef.current[event.pointerId]?.piece;
                 if (heldPiece != null) {
+                  if (temporaryEditsRef.current[heldPiece] != null) {
+                    mutateSinglePiece(
+                      heldPiece,
+                      (prev) =>
+                        (prev.transform = temporaryEditsRef.current[heldPiece])
+                    );
+                    delete temporaryEditsRef.current[heldPiece];
+                  }
                   onChangePieceSelected?.(heldPiece, false);
                 }
 
@@ -149,9 +181,18 @@ export function Workspace({
             >
               <g transform={mat2d.toSvgInstruction(cameraTransform)}>
                 {Object.entries(pieces).map(([id, piece]) => (
-                  <PieceView
+                  <g
                     key={id}
-                    piece={piece}
+                    ref={(ref) => {
+                      if (ref == null) {
+                        delete pieceViewsRef.current[id];
+                      } else {
+                        pieceViewsRef.current[id] = ref;
+                      }
+                    }}
+                    transform={mat2d.toSvgInstruction(
+                      temporaryEditsRef.current[id] ?? M.Piece.transform(piece)
+                    )}
                     {...(editable
                       ? {
                           onPointerDown: (event) => {
@@ -168,23 +209,10 @@ export function Workspace({
                           },
                         }
                       : {})}
-                  />
+                  >
+                    {M.Piece.render(piece)}
+                  </g>
                 ))}
-                {enableSafeAreaBounds && dimensions != null && (
-                  // This shouldn't change aspect ratio with viewport; I think the
-                  // best thing to do would be to grab aspect ratio at launch, and
-                  // resizing window just scales the existing aspect ratio to
-                  // fit.
-                  <rect
-                    stroke="red"
-                    strokeWidth={1}
-                    width={vec2.x(BASE_FRAME_SIZE)}
-                    height={vec2.y(BASE_FRAME_SIZE)}
-                    x={0}
-                    y={0}
-                    fill="none"
-                  />
-                )}
               </g>
             </svg>
           )}
