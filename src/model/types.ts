@@ -1,10 +1,15 @@
 import * as React from "react";
+import { uniqueId } from "lodash";
 import {
   ReadonlyMat2d,
   ReadonlyVec2,
   Mat2d,
   mat2d,
 } from "../utility/gl-matrix";
+
+export function nextId(collection: "pieces"): string {
+  return uniqueId(collection);
+}
 
 export interface Piece {
   renderContent(): React.ReactNode;
@@ -21,6 +26,10 @@ export const Piece = {
     transform: Mat2d;
   }): Piece {
     return { renderContent, transform };
+  },
+
+  clone(p: Piece): Piece {
+    return { ...p, transform: mat2d.clone(p.transform) };
   },
 
   // Getters

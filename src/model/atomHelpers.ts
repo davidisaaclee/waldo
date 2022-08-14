@@ -47,3 +47,17 @@ export function useCaptureToFrameCallback() {
     [setAnimation, pieces, currentFrameIndex, setCurrentFrameIndex]
   );
 }
+
+export function useCloneSelection() {
+  const [selection] = useAtom(A.selection);
+  const [, setPieces] = useImmerAtom(A.pieces);
+
+  return React.useCallback(() => {
+    setPieces((pieces) => {
+      const selectedPieces = Object.keys(selection).map((id) => pieces[id]);
+      for (const p of selectedPieces) {
+        pieces[M.nextId("pieces")] = M.Piece.clone(p);
+      }
+    });
+  }, [selection, setPieces]);
+}

@@ -1,6 +1,6 @@
 import { atom, SetStateAction } from "jotai";
 import * as M from "./types";
-import { uniqueId, keyBy } from "lodash";
+import { keyBy } from "lodash";
 // import { produce } from "immer";
 import { mat2d } from "../utility/gl-matrix";
 
@@ -35,6 +35,9 @@ export const currentFrameIndexWrapping = atom(
     );
   }
 );
+
+// if piece ID is a key of this value, it is selected
+export const selection = atom<Record<string, any>>({});
 
 export const animation = atom<M.Animation>(
   M.Animation.create({
@@ -84,7 +87,7 @@ export const pieces = atom<Record<string, M.Piece>>(
         }),
       }),
     ],
-    () => uniqueId()
+    () => M.nextId("pieces")
   )
 );
 

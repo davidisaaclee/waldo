@@ -16,6 +16,7 @@ export function Workspace({
   editable = false,
   enableInteractiveCameraTransform = false,
   pieces,
+  onChangePieceSelected,
 }: {
   style?: React.CSSProperties;
   className?: string;
@@ -24,6 +25,7 @@ export function Workspace({
   editable?: boolean;
   enableInteractiveCameraTransform?: boolean;
   pieces: Record<string, M.Piece>;
+  onChangePieceSelected?: (pieceId: string, isSelected: boolean) => void;
 }) {
   const mutateSinglePiece = AtomHelpers.useMutateSinglePiece();
   const [dimensions, setDimensions] = React.useState<ReadonlyVec2 | null>(null);
@@ -136,6 +138,12 @@ export function Workspace({
                 };
               }}
               onPointerUp={(event) => {
+                const heldPiece =
+                  pointerRolesRef.current[event.pointerId]?.piece;
+                if (heldPiece != null) {
+                  onChangePieceSelected?.(heldPiece, false);
+                }
+
                 delete pointerRolesRef.current[event.pointerId];
               }}
             >
@@ -167,14 +175,7 @@ export function Workspace({
                               piece: id,
                               prevPosition: vec2.fromClientPosition(event),
                             };
-                          },
-                          onPointerUp: (event) => {
-                            if (
-                              pointerRolesRef.current[event.pointerId].piece ===
-                              id
-                            ) {
-                              delete pointerRolesRef.current[event.pointerId];
-                            }
+                            onChangePieceSelected?.(id, true);
                           },
                         }
                       : {})}

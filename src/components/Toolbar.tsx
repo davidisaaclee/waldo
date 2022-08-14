@@ -37,6 +37,21 @@ export function Toolbar() {
     },
   });
 
+  const [selection] = useAtom(A.selection);
+  const cloneSelection = AtomHelpers.useCloneSelection();
+  const cloneSelectionButtonRef =
+    React.useRef<React.ElementRef<"button">>(null);
+
+  React.useEffect(() => {
+    function onKeyPress(event: KeyboardEvent) {
+      if (event.key === "c") {
+        cloneSelectionButtonRef.current?.click();
+      }
+    }
+    document.addEventListener("keypress", onKeyPress);
+    return () => document.removeEventListener("keypress", onKeyPress);
+  }, []);
+
   return (
     <div className={styles.toolbar}>
       <button
@@ -108,6 +123,16 @@ export function Toolbar() {
       <label className={styles.label}>
         Frame {currentFrameIndex + 1} / {animation.frames.length}
       </label>
+
+      {Object.keys(selection).length > 0 && (
+        <button
+          ref={cloneSelectionButtonRef}
+          className={styles.button}
+          onClick={cloneSelection}
+        >
+          <u>C</u>lone selection
+        </button>
+      )}
     </div>
   );
 }
