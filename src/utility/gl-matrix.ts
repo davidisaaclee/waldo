@@ -103,9 +103,11 @@ const extraVec2Methods = {
     return Math.atan2(x(a) * y(b) - y(a) * x(b), x(a) * x(b) + y(a) * y(b));
   },
 
-  centroid: (points: vec2[], out: vec2 = vec2.create()): vec2 => {
+  centroid: (points: ReadonlyVec2[], out: vec2 = vec2.create()): vec2 => {
     vec2.zero(out);
-    points.reduce((acc, elm) => vec2.add(acc, acc, elm), out);
+    for (const p of points) {
+      vec2.add(out, out, p);
+    }
     vec2.scale(out, out, 1 / points.length);
     return out;
   },
