@@ -112,6 +112,16 @@ const extraVec2Methods = {
     return out;
   },
 
+  scaleToAspectFit: (
+    sizeToScale: ReadonlyVec2,
+    fitWithin: ReadonlyVec2
+  ): number => {
+    const { x, y } = enhancedVec2;
+    const xFitScaleFactor = x(fitWithin) / x(sizeToScale);
+    const yFitScaleFactor = y(fitWithin) / y(sizeToScale);
+    return Math.min(xFitScaleFactor, yFitScaleFactor);
+  },
+
   /** Hash a vec2 into a string. Useful when attempting to memoize functions that take a vec2. */
   hash: (v: vec2): string => {
     return extraVec2Methods.toTuple(v).join(",");
@@ -268,11 +278,10 @@ const extraMat2dMethods = {
     fitWithin: ReadonlyVec2,
     out: mat2d = mat2d.create()
   ): mat2d => {
-    const { x, y } = enhancedVec2;
-    const xFitScaleFactor = x(fitWithin) / x(sizeToScale);
-    const yFitScaleFactor = y(fitWithin) / y(sizeToScale);
-    const minScaleFactor = Math.min(xFitScaleFactor, yFitScaleFactor);
-    return mat2d.fromScaling(out, [minScaleFactor, minScaleFactor]);
+    return mat2d.fromScaling(
+      out,
+      enhancedVec2.unit(enhancedVec2.scaleToAspectFit(sizeToScale, fitWithin))
+    );
   },
 
   /** Hash a mat2d into a string. Useful when attempting to memoize functions that take a mat2d. */
