@@ -39,7 +39,7 @@ export function Toolbar() {
   });
 
   const [selection] = useAtom(A.selection);
-  const cloneSelection = useMutableCallback(AtomHelpers.useCloneSelection());
+  const cloneSelection = AtomHelpers.useClonePieces();
   const cloneSelectionButtonRef =
     React.useRef<React.ElementRef<"button">>(null);
   const changeSelectionColor = useMutableCallback(

@@ -1,9 +1,12 @@
 import { atom, SetStateAction } from "jotai";
 import * as M from "./types";
 import { keyBy, sample } from "lodash";
-// import { produce } from "immer";
-import { mat2d } from "../utility/gl-matrix";
+import { Mat2d, mat2d } from "../utility/gl-matrix";
 import * as K from "../constants";
+
+export const temporaryEditsRef = atom<{ current: Record<string, Mat2d> }>({
+  current: {},
+});
 
 export const currentFrameIndex_unsafe = atom(0);
 export const currentFrameIndex = atom(

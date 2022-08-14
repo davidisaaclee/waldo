@@ -1,8 +1,10 @@
 import * as React from "react";
 import styles from "./Workspace.module.scss";
-import { ReadonlyVec2, Mat2d, mat2d, vec2 } from "../utility/gl-matrix";
+import { ReadonlyVec2, mat2d, vec2 } from "../utility/gl-matrix";
 import classnames from "classnames";
 import * as M from "../model/types";
+import { useAtom } from "jotai";
+import * as A from "../model/atoms";
 import * as AtomHelpers from "../model/atomHelpers";
 import Measure from "react-measure";
 import { useAnimationFrame } from "../utility/useAnimationFrame";
@@ -60,7 +62,7 @@ export function Workspace({
     [cameraTransform]
   );
 
-  const temporaryEditsRef = React.useRef<Record<string, Mat2d>>({});
+  const [temporaryEditsRef] = useAtom(A.temporaryEditsRef);
 
   const onGeneralPointerMove = React.useCallback(
     (event: React.PointerEvent<SVGElement>) => {
@@ -119,7 +121,12 @@ export function Workspace({
       }
       pointerRole.prevPosition = pos;
     },
-    [getPieces, enableInteractiveCameraTransform, inverseCameraTransform]
+    [
+      temporaryEditsRef,
+      getPieces,
+      enableInteractiveCameraTransform,
+      inverseCameraTransform,
+    ]
   );
 
   const pieceViewsRef = React.useRef<Record<string, SVGElement>>({});

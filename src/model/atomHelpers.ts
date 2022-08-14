@@ -1,9 +1,11 @@
 import * as React from "react";
 import { useAtom } from "jotai";
 import { useImmerAtom } from "jotai/immer";
+import { keyBy } from "lodash";
 import * as M from "./types";
 import * as A from "./atoms";
 import * as K from "../constants";
+import { mat2d } from "../utility/gl-matrix";
 
 export function useMutateSinglePiece() {
   const [, setPieces] = useImmerAtom(A.pieces);
@@ -35,7 +37,11 @@ export function useCaptureToFrameCallback() {
     } = {}) => {
       const frameToInsert = useBlankFrameInsteadOfDuplicate
         ? M.Frame.create()
-        : M.Frame.create({ pieces });
+        : M.Frame.create({
+            pieces: keyBy(Object.values(pieces).map(M.Piece.clone), () =>
+              M.nextId("pieces")
+            ),
+          });
       setAnimation((prev) => {
         if (replaceCurrentFrame) {
           M.Animation.replaceFrame(prev, frameToInsert, currentFrameIndex);
@@ -49,18 +55,22 @@ export function useCaptureToFrameCallback() {
   );
 }
 
-export function useCloneSelection() {
+export function useClonePieces() {
   const [selection] = useAtom(A.selection);
+  const [temporaryEditsRef] = useAtom(A.temporaryEditsRef);
   const [, setPieces] = useImmerAtom(A.pieces);
 
   return React.useCallback(() => {
     setPieces((pieces) => {
-      const selectedPieces = Object.keys(selection).map((id) => pieces[id]);
-      for (const p of selectedPieces) {
-        pieces[M.nextId("pieces")] = M.Piece.clone(p);
-      }
+      Object.keys(selection).forEach((id) => {
+        const p = M.Piece.clone(pieces[id]);
+        if (temporaryEditsRef.current[id] != null) {
+          p.transform = mat2d.clone(temporaryEditsRef.current[id]);
+        }
+        pieces[M.nextId("pieces")] = p;
+      });
     });
-  }, [selection, setPieces]);
+  }, [temporaryEditsRef, selection, setPieces]);
 }
 
 let nextPaletteSampleIndex = 0;
