@@ -20,6 +20,7 @@ export function Workspace({
   enableInteractiveCameraTransform = false,
   pieces,
   onChangePieceSelected,
+  wireframe = false,
 }: {
   style?: React.CSSProperties;
   className?: string;
@@ -29,6 +30,7 @@ export function Workspace({
   enableInteractiveCameraTransform?: boolean;
   pieces: Record<string, M.Piece>;
   onChangePieceSelected?: (pieceId: string, isSelected: boolean) => void;
+  wireframe?: boolean;
 }) {
   const getPieces = useMutable(pieces);
   const mutateSinglePiece = AtomHelpers.useMutateSinglePiece();
@@ -237,7 +239,17 @@ export function Workspace({
                         }
                       : {})}
                   >
-                    <path d={piece.path} fill={piece.fill} />
+                    <path
+                      d={piece.path}
+                      {...(wireframe
+                        ? {
+                            stroke: "white",
+                            fill: "transparent",
+                          }
+                        : {
+                            fill: piece.fill,
+                          })}
+                    />
                   </g>
                 ))}
               </g>

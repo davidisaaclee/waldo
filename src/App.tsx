@@ -33,6 +33,7 @@ function App() {
         editable={false}
         pieces={currentFrame.pieces}
         className={classnames(styles.absoluteFill, styles.onionSkinWorkspace)}
+        wireframe
       />
       <Toolbar />
     </div>
