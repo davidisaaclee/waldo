@@ -42,6 +42,8 @@ export function Toolbar() {
   const cloneSelectionButtonRef =
     React.useRef<React.ElementRef<"button">>(null);
 
+  const restoreFrame = AtomHelpers.useRestoreFrameCallback();
+
   React.useEffect(() => {
     function onKeyPress(event: KeyboardEvent) {
       if (event.key === "c") {
@@ -71,6 +73,13 @@ export function Toolbar() {
         }}
       >
         Replace frame
+      </button>
+      <button
+        className={styles.button}
+        disabled={isPlaying}
+        onClick={restoreFrame}
+      >
+        Restore frame
       </button>
       <button
         className={styles.button}

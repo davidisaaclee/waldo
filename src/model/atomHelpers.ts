@@ -61,3 +61,11 @@ export function useCloneSelection() {
     });
   }, [selection, setPieces]);
 }
+
+export function useRestoreFrameCallback() {
+  const [currentFrame] = useAtom(A.currentFrame);
+  const [, setPieces] = useAtom(A.pieces);
+  return React.useCallback(() => {
+    setPieces(currentFrame.pieces);
+  }, [setPieces, currentFrame]);
+}
