@@ -33,7 +33,6 @@ function App() {
             }
           });
         }}
-        // enableInteractiveCameraTransform
       />
       <Workspace
         editable={false}
@@ -44,6 +43,7 @@ function App() {
       <Toolbar onPressOverflow={() => setIsShowingOverflow((p) => !p)} />
       <Modal
         className={styles.overflowMenu}
+        overlayClassName={styles.overflowMenuOverlay}
         isOpen={isShowingOverflow}
         shouldCloseOnOverlayClick
         onRequestClose={() => setIsShowingOverflow(false)}
