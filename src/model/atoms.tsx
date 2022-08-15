@@ -1,7 +1,8 @@
 import { atom, SetStateAction } from "jotai";
+import { atomWithStorage } from "jotai/utils";
 import * as M from "./types";
 import { keyBy, sample } from "lodash";
-import { Mat2d, mat2d } from "../utility/gl-matrix";
+import { Mat2d } from "../utility/gl-matrix";
 import * as K from "../constants";
 
 export const temporaryEditsRef = atom<{ current: Record<string, Mat2d> }>({
@@ -43,7 +44,8 @@ export const currentFrameIndexWrapping = atom(
 // if piece ID is a key of this value, it is selected
 export const selection = atom<Record<string, any>>({});
 
-export const animation = atom<M.Animation>(
+export const animation = atomWithStorage<M.Animation>(
+  "animation",
   M.Animation.create({
     frames: [M.Frame.create()],
   })
@@ -53,7 +55,8 @@ export const currentFrame = atom(
   (read) => read(animation).frames[read(currentFrameIndex)]
 );
 
-export const pieces = atom<Record<string, M.Piece>>(
+export const pieces = atomWithStorage<Record<string, M.Piece>>(
+  "pieces",
   keyBy(
     K.INITIAL_PIECES.map((p) => ({
       ...p,
