@@ -22,6 +22,7 @@ export function Workspace({
   onChangePieceSelected,
   wireframe = false,
   frameMargin = 100,
+  hideFrame = false,
 }: {
   style?: React.CSSProperties;
   className?: string;
@@ -33,6 +34,7 @@ export function Workspace({
   pieces: Record<string, M.Piece>;
   onChangePieceSelected?: (pieceId: string, isSelected: boolean) => void;
   wireframe?: boolean;
+  hideFrame?: boolean;
 }) {
   const getPieces = useMutable(pieces);
   const mutateSinglePiece = AtomHelpers.useMutateSinglePiece();
@@ -288,12 +290,14 @@ export function Workspace({
                     />
                   </g>
                 ))}
-                <rect
-                  width={vec2.x(BASE_FRAME_SIZE)}
-                  height={vec2.y(BASE_FRAME_SIZE)}
-                  fill="none"
-                  stroke="red"
-                />
+                {!hideFrame && (
+                  <rect
+                    width={vec2.x(BASE_FRAME_SIZE)}
+                    height={vec2.y(BASE_FRAME_SIZE)}
+                    fill="none"
+                    stroke="red"
+                  />
+                )}
               </g>
             </svg>
           )}

@@ -21,11 +21,13 @@
     width: 100%;
   }
 
-  .preview {
+  .previewContainer {
     outline: 1px solid white;
     width: 100%;
     aspect-ratio: 1 / 1;
+    position: relative;
   }
+
 }
 
 .transport {
@@ -35,4 +37,39 @@
   .button {
     padding: 20px;
   }
+}
+
+.absoluteFill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.fullscreenPreviewModal {
+  flex: 1;
+  aspect-ratio: 1 / 1;
+  height: 100%;
+  // position: absolute;
+  // top: 0;
+  // height: 100vh;
+  // left: 0;
+  // width: 100vh;
+  background-color: black;
+  position: relative;
+}
+
+.fullscreenPreviewModalOverlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+
+  background-color: black;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: center;
 }

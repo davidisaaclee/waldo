@@ -6,6 +6,7 @@ import { useAtom } from "jotai";
 import { Workspace } from "./Workspace";
 import { useAnimationFrame } from "../utility/useAnimationFrame";
 import { useMutableCallback } from "../utility/useMutable";
+import Modal from "react-modal";
 
 const FRAME_DURATION_MS = 100;
 
@@ -16,6 +17,8 @@ export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
   const captureFrame = AtomHelpers.useCaptureToFrameCallback();
   const [currentFrame] = useAtom(A.currentFrame);
   const [animation] = useAtom(A.animation);
+  const [isFullscreenPreviewOpen, setIsFullscreenPreviewOpen] =
+    React.useState(false);
 
   const [playState, setPlayState] = React.useState<{
     startFrameIndex: number;
@@ -63,6 +66,19 @@ export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
     document.addEventListener("keypress", onKeyPress);
     return () => document.removeEventListener("keypress", onKeyPress);
   }, []);
+
+  const togglePlayback = React.useCallback(() => {
+    setPlayState((prev) => {
+      if (prev == null) {
+        return {
+          startFrameIndex: currentFrameIndex,
+          playbackStartedAt: performance.now(),
+        };
+      } else {
+        return null;
+      }
+    });
+  }, [currentFrameIndex, setPlayState]);
 
   return (
     <div className={styles.toolbar}>
@@ -114,18 +130,7 @@ export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
         <button
           className={styles.button}
           style={{ flex: 1 }}
-          onClick={() =>
-            setPlayState((prev) => {
-              if (prev == null) {
-                return {
-                  startFrameIndex: currentFrameIndex,
-                  playbackStartedAt: performance.now(),
-                };
-              } else {
-                return null;
-              }
-            })
-          }
+          onClick={togglePlayback}
         >
           {isPlaying ? "Pause" : "Play"}
         </button>
@@ -138,11 +143,18 @@ export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
           +1
         </button>
       </div>
-      <Workspace
-        pieces={currentFrame.pieces}
-        className={styles.preview}
-        frameMargin={0}
-      />
+      <div
+        className={styles.previewContainer}
+        onClick={() => {
+          setIsFullscreenPreviewOpen(true);
+        }}
+      >
+        <Workspace
+          className={styles.absoluteFill}
+          pieces={currentFrame.pieces}
+          frameMargin={0}
+        />
+      </div>
       <div className={styles.label} style={{ position: "relative" }}>
         <span>
           Frame {currentFrameIndex + 1} / {animation.frames.length}
@@ -181,6 +193,38 @@ export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
           </button>
         </>
       )}
+
+      <Modal
+        isOpen={isFullscreenPreviewOpen}
+        onRequestClose={() => setIsFullscreenPreviewOpen(false)}
+        className={styles.fullscreenPreviewModal}
+        overlayClassName={styles.fullscreenPreviewModalOverlay}
+      >
+        <div
+          className={styles.absoluteFill}
+          onClick={() => setIsFullscreenPreviewOpen(false)}
+        >
+          <Workspace
+            pieces={currentFrame.pieces}
+            className={styles.absoluteFill}
+            frameMargin={0}
+            hideFrame
+          />
+        </div>
+        <div
+          style={{
+            position: "absolute",
+            transform: "translate(100%, 0)",
+            padding: 20,
+            right: 0,
+            bottom: 0,
+          }}
+        >
+          <button onClick={togglePlayback} style={{ padding: 20 }}>
+            {isPlaying ? "Pause" : "Play"}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
