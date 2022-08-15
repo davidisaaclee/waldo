@@ -9,7 +9,7 @@ import { useMutableCallback } from "../utility/useMutable";
 
 const FRAME_DURATION_MS = 100;
 
-export function Toolbar() {
+export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
   const [currentFrameIndex, setCurrentFrameIndex] = useAtom(
     A.currentFrameIndexWrapping
   );
@@ -143,8 +143,24 @@ export function Toolbar() {
         className={styles.preview}
         frameMargin={0}
       />
-      <div className={styles.label}>
-        Frame {currentFrameIndex + 1} / {animation.frames.length}
+      <div className={styles.label} style={{ position: "relative" }}>
+        <span>
+          Frame {currentFrameIndex + 1} / {animation.frames.length}
+        </span>
+        <button
+          style={{
+            position: "absolute",
+            borderRadius: 15,
+            width: 30,
+            height: 30,
+            padding: 0,
+            top: 15,
+            right: 10,
+          }}
+          onClick={onPressOverflow}
+        >
+          ...
+        </button>
       </div>
 
       {Object.keys(selection).length > 0 && (

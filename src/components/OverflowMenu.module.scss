@@ -1,0 +1,12 @@
+.container {
+  background-color: gray;
+  padding: 20px;
+
+  display: flex;
+  flex-flow: column nowrap;
+
+  & > * {
+    margin: 10px;
+    padding: 30px;
+  }
+}

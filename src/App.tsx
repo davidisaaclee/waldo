@@ -1,3 +1,4 @@
+import * as React from "react";
 import styles from "./App.module.scss";
 import classnames from "classnames";
 import * as A from "./model/atoms";
@@ -5,11 +6,16 @@ import { useAtom } from "jotai";
 import { useImmerAtom } from "jotai/immer";
 import { Workspace } from "./components/Workspace";
 import { Toolbar } from "./components/Toolbar";
+import { OverflowMenu } from "./components/OverflowMenu";
+import Modal from "react-modal";
+
+Modal.setAppElement("#root");
 
 function App() {
   const [currentFrame] = useAtom(A.currentFrame);
   const [workingPieces] = useAtom(A.pieces);
   const [, setSelection] = useImmerAtom(A.selection);
+  const [isShowingOverflow, setIsShowingOverflow] = React.useState(false);
 
   return (
     <div className={styles.app}>
@@ -35,7 +41,15 @@ function App() {
         className={classnames(styles.absoluteFill, styles.onionSkinWorkspace)}
         wireframe
       />
-      <Toolbar />
+      <Toolbar onPressOverflow={() => setIsShowingOverflow((p) => !p)} />
+      <Modal
+        className={styles.overflowMenu}
+        isOpen={isShowingOverflow}
+        shouldCloseOnOverlayClick
+        onRequestClose={() => setIsShowingOverflow(false)}
+      >
+        <OverflowMenu />
+      </Modal>
     </div>
   );
 }
