@@ -55,15 +55,19 @@ export const currentFrame = atom(
   (read) => read(animation).frames[read(currentFrameIndex)]
 );
 
-export const pieces = atomWithStorage<Record<string, M.Piece>>(
-  "pieces",
-  keyBy(
+export function initialPieces(): Record<string, M.Piece> {
+  return keyBy(
     K.INITIAL_PIECES.map((p) => ({
       ...p,
       fill: sample(K.COLOR_PALETTE)!,
     })),
     () => M.nextId("pieces")
-  )
+  );
+}
+
+export const pieces = atomWithStorage<Record<string, M.Piece>>(
+  "pieces",
+  initialPieces()
 );
 
 function applySetStateAction<Value>(

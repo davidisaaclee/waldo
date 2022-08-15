@@ -16,6 +16,7 @@ export function OverflowMenu({
   const [currentFrameIndex, setCurrentFrameIndex] = useAtom(
     A.currentFrameIndex
   );
+  const [, setPieces] = useAtom(A.pieces);
 
   return (
     <div className={classnames(styles.container, className)}>
@@ -45,6 +46,13 @@ export function OverflowMenu({
         }}
       >
         ! Delete all frames !
+      </button>
+      <button
+        onClick={() => {
+          setPieces(A.initialPieces());
+        }}
+      >
+        Reset shapes to starter kit
       </button>
     </div>
   );
