@@ -1,6 +1,7 @@
 import * as React from "react";
 import { useAtom } from "jotai";
 import { useImmerAtom } from "jotai/immer";
+import { keyBy } from "lodash";
 import * as M from "./types";
 import * as A from "./atoms";
 import * as K from "../constants";
@@ -112,6 +113,10 @@ export function useRestoreFrameCallback() {
   const [currentFrame] = useAtom(A.currentFrame);
   const [, setPieces] = useAtom(A.pieces);
   return React.useCallback(() => {
-    setPieces(currentFrame.pieces);
+    setPieces(
+      keyBy(Object.values(currentFrame.pieces).map(M.Piece.clone), () =>
+        M.nextId("pieces")
+      )
+    );
   }, [setPieces, currentFrame]);
 }
