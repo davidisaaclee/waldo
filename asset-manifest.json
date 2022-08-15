@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/waldo/static/css/main.2681d26b.css",
+    "main.js": "/waldo/static/js/main.97b16cef.js",
+    "static/js/787.783ebc69.chunk.js": "/waldo/static/js/787.783ebc69.chunk.js",
+    "index.html": "/waldo/index.html",
+    "main.2681d26b.css.map": "/waldo/static/css/main.2681d26b.css.map",
+    "main.97b16cef.js.map": "/waldo/static/js/main.97b16cef.js.map",
+    "787.783ebc69.chunk.js.map": "/waldo/static/js/787.783ebc69.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.2681d26b.css",
+    "static/js/main.97b16cef.js"
+  ]
+}
