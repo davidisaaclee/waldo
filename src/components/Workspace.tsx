@@ -84,7 +84,7 @@ export function Workspace({
     }
 
     setCameraTransform(out);
-  }, [dimensions]);
+  }, [frameMargin, dimensions]);
 
   // maps pointerId -> info
   const pointerRolesRef = React.useRef<

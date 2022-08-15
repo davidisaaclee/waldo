@@ -22,7 +22,6 @@ export function useMutateSinglePiece() {
 }
 
 export function useCaptureToFrameCallback() {
-  const [pieces] = useAtom(A.pieces);
   const [, setAnimation] = useImmerAtom(A.animation);
   const [currentFrameIndex, setCurrentFrameIndex] = useAtom(
     A.currentFrameIndex_unsafe
@@ -50,7 +49,7 @@ export function useCaptureToFrameCallback() {
         }
       });
     },
-    [setAnimation, pieces, currentFrameIndex, setCurrentFrameIndex]
+    [getClones, setAnimation, currentFrameIndex, setCurrentFrameIndex]
   );
 }
 
@@ -74,7 +73,7 @@ export function useGetCopiesOfPieces() {
       });
       return out;
     },
-    [temporaryEditsRef]
+    [getPieces, temporaryEditsRef]
   );
 }
 

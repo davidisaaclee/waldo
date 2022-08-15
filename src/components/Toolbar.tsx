@@ -62,7 +62,7 @@ export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
     }
     document.addEventListener("keypress", onKeyPress);
     return () => document.removeEventListener("keypress", onKeyPress);
-  }, []);
+  }, [changeSelectionColor, cloneSelection]);
 
   const togglePlayback = React.useCallback(() => {
     setPlayState((prev) => {
