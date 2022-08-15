@@ -53,15 +53,12 @@ export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
   const restoreFrame = AtomHelpers.useRestoreFrameCallback();
 
   React.useEffect(() => {
-    const buttonForKey: Record<
-      string,
-      React.RefObject<React.ElementRef<"button">>
-    > = {
-      d: cloneSelectionButtonRef,
-      c: changeColorButtonRef,
+    const buttonForKey: Record<string, () => void> = {
+      d: cloneSelection,
+      c: changeSelectionColor,
     };
     function onKeyPress(event: KeyboardEvent) {
-      buttonForKey[event.key]?.current?.click();
+      buttonForKey[event.key]?.();
     }
     document.addEventListener("keypress", onKeyPress);
     return () => document.removeEventListener("keypress", onKeyPress);
@@ -85,7 +82,7 @@ export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
       <button
         className={styles.button}
         disabled={isPlaying}
-        onClick={() => {
+        onPointerDown={() => {
           captureFrame({ replaceCurrentFrame: false });
         }}
       >
@@ -94,7 +91,7 @@ export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
       <button
         className={styles.button}
         disabled={isPlaying}
-        onClick={() => {
+        onPointerDown={() => {
           captureFrame({ replaceCurrentFrame: true });
         }}
       >
@@ -103,14 +100,14 @@ export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
       <button
         className={styles.button}
         disabled={isPlaying}
-        onClick={restoreFrame}
+        onPointerDown={restoreFrame}
       >
         Restore frame
       </button>
       <button
         className={styles.button}
         disabled={isPlaying}
-        onClick={() => {
+        onPointerDown={() => {
           captureFrame({
             replaceCurrentFrame: false,
             useBlankFrameInsteadOfDuplicate: true,
@@ -123,14 +120,14 @@ export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
         <button
           className={styles.button}
           style={isPlaying ? { display: "none" } : undefined}
-          onClick={() => setCurrentFrameIndex((prev) => prev - 1)}
+          onPointerDown={() => setCurrentFrameIndex((prev) => prev - 1)}
         >
           -1
         </button>
         <button
           className={styles.button}
           style={{ flex: 1 }}
-          onClick={togglePlayback}
+          onPointerDown={togglePlayback}
         >
           {isPlaying ? "Pause" : "Play"}
         </button>
@@ -138,14 +135,14 @@ export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
           className={styles.button}
           style={isPlaying ? { display: "none" } : undefined}
           disabled={isPlaying}
-          onClick={() => setCurrentFrameIndex((prev) => prev + 1)}
+          onPointerDown={() => setCurrentFrameIndex((prev) => prev + 1)}
         >
           +1
         </button>
       </div>
       <div
         className={styles.previewContainer}
-        onClick={() => {
+        onPointerDown={() => {
           setIsFullscreenPreviewOpen(true);
         }}
       >
@@ -169,7 +166,7 @@ export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
             top: 15,
             right: 10,
           }}
-          onClick={onPressOverflow}
+          onPointerDown={onPressOverflow}
         >
           ...
         </button>
@@ -180,14 +177,14 @@ export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
           <button
             ref={cloneSelectionButtonRef}
             className={styles.button}
-            onClick={cloneSelection}
+            onPointerDown={cloneSelection}
           >
             <u>D</u>uplicate selection
           </button>
           <button
             ref={changeColorButtonRef}
             className={styles.button}
-            onClick={changeSelectionColor}
+            onPointerDown={changeSelectionColor}
           >
             <u>C</u>hange color
           </button>
@@ -202,7 +199,7 @@ export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
       >
         <div
           className={styles.absoluteFill}
-          onClick={() => setIsFullscreenPreviewOpen(false)}
+          onPointerDown={() => setIsFullscreenPreviewOpen(false)}
         >
           <Workspace
             pieces={currentFrame.pieces}
@@ -220,7 +217,7 @@ export function Toolbar({ onPressOverflow }: { onPressOverflow?: () => void }) {
             bottom: 0,
           }}
         >
-          <button onClick={togglePlayback} style={{ padding: 20 }}>
+          <button onPointerDown={togglePlayback} style={{ padding: 20 }}>
             {isPlaying ? "Pause" : "Play"}
           </button>
         </div>
