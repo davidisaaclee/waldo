@@ -1,46 +1,16 @@
-# Getting Started with Create React App
+# Waldo - papercut animation toy
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+I went to the Jim Henson exhibit at the SF Jewish art museum, and I saw a video there that showed someone animating a frame-by-frame sequence by photographing paper shapes on a table. I have a strong attraction to tables simulated by software, so I wrote Waldo to simulate what that kind of animation could be like.
 
-## Available Scripts
+[Try it out here.](http://david-lee.net/waldo/)
 
-In the project directory, you can run:
+1. Drag some shapes to make a single frame. (Touchscreens can pinch to rotate/scale.)
+2. Click `Capture to next frame`
+3. Move shapes a little more, using the outlines as a guide of where the shapes were in the last frame
+4. Click `Capture to next frame` again
+5. Continue adding frames
+6. Press `Play` to preview the animation
+7. Click on the small preview box to fullscreen the preview. Click anywhere in the fullscreen to minimize.
+8. To edit a previous frame, click `-1` / `+1` to navigate the preview to it; click `Restore frame` to make the table match the previewed frame; make changes; then click `Replace frame` to replace the previewed frame with the contents of the table.
 
-### `yarn start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `yarn test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+<img width="1440" alt="Screenshot 2024-07-22 at 9 22 40 AM" src="https://github.com/user-attachments/assets/b85c1e15-1396-48f0-8187-ac44552095d3">
